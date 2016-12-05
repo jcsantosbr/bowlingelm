@@ -165,17 +165,36 @@ drawFrames scoredFrames =
         List.map drawFrame nonEmptyScoredFrames
 
 
-drawPanel =
+drawButton lessPinsThanCurrent numberOfPins =
+    let
+        isEnabled =
+            not (lessPinsThanCurrent numberOfPins)
+    in
+        button [ (onClick (NewRoll numberOfPins)), (disabled isEnabled) ]
+            [ text (toString numberOfPins) ]
+
+
+drawPanel lessPinsThanCurrent =
     div [ class "panel" ]
         ((button [ onClick NewGame ] [ text "New Game" ])
             :: (List.map
-                    (\i ->
-                        button [ (onClick (NewRoll i)) ]
-                            [ text (toString i) ]
-                    )
+                    (\i -> (drawButton lessPinsThanCurrent i))
                     (List.range 0 10)
                )
         )
+
+
+isOverMaximumPins currentFrame newPin =
+    let
+        currentPin =
+            case currentFrame of
+                OngoingFrame pins ->
+                    pins
+
+                _ ->
+                    0
+    in
+        currentPin + newPin <= 10
 
 
 type alias Model =
@@ -200,12 +219,16 @@ main =
 
 
 view model =
-    div []
-        [ div [ class "score" ]
-            (drawFrames model.frames)
-        , drawPanel
-        , p [] [ (text model.feedback) ]
-        ]
+    let
+        lessPinsThanCurrent =
+            isOverMaximumPins model.currentFrame
+    in
+        div []
+            [ div [ class "score" ]
+                (drawFrames model.frames)
+            , drawPanel lessPinsThanCurrent
+            , p [] [ (text model.feedback) ]
+            ]
 
 
 type Msg
@@ -412,7 +435,7 @@ runNewRoll model pins =
                 if isGameFinished frames then
                     "End of game!"
                 else
-                    toString scoredFrames
+                    ""
         in
             Model scoredFrames frames rolls currentFrame feedback
 

@@ -8356,35 +8356,19 @@ var _user$project$Bowling$isLastFrame = function (frames) {
 			frames));
 	return _elm_lang$core$Native_Utils.eq(completedFrames, 9);
 };
-var _user$project$Bowling$drawSecondRoll = function (frame) {
-	return _elm_lang$html$Html$text(
-		function () {
-			var _p5 = frame;
-			switch (_p5.ctor) {
-				case 'EmptyFrame':
-					return '';
-				case 'OngoingFrame':
-					return '';
-				case 'NormalFrame':
-					return _elm_lang$core$Basics$toString(_p5._1);
-				case 'Spare':
-					return _elm_lang$core$Basics$toString(_p5._1);
-				case 'Strike':
-					return 'X';
-				case 'OngoingSpare':
-					return _elm_lang$core$Basics$toString(_p5._1);
-				case 'LastFrameSpare':
-					return _elm_lang$core$Basics$toString(_p5._1);
-				case 'OngoingStrikeFistExtra':
-					return '...';
-				case 'OngoingStrikeSecondExtra':
-					return _elm_lang$core$Basics$toString(_p5._0);
-				default:
-					return _elm_lang$core$Basics$toString(_p5._0);
+var _user$project$Bowling$isOverMaximumPins = F2(
+	function (currentFrame, newPin) {
+		var currentPin = function () {
+			var _p5 = currentFrame;
+			if (_p5.ctor === 'OngoingFrame') {
+				return _p5._0;
+			} else {
+				return 0;
 			}
-		}());
-};
-var _user$project$Bowling$drawFirstRoll = function (frame) {
+		}();
+		return _elm_lang$core$Native_Utils.cmp(currentPin + newPin, 10) < 1;
+	});
+var _user$project$Bowling$drawSecondRoll = function (frame) {
 	return _elm_lang$html$Html$text(
 		function () {
 			var _p6 = frame;
@@ -8392,17 +8376,45 @@ var _user$project$Bowling$drawFirstRoll = function (frame) {
 				case 'EmptyFrame':
 					return '';
 				case 'OngoingFrame':
-					return _elm_lang$core$Basics$toString(_p6._0);
+					return '';
 				case 'NormalFrame':
-					return _elm_lang$core$Basics$toString(_p6._0);
+					return _elm_lang$core$Basics$toString(_p6._1);
 				case 'Spare':
+					return _elm_lang$core$Basics$toString(_p6._1);
+				case 'Strike':
+					return 'X';
+				case 'OngoingSpare':
+					return _elm_lang$core$Basics$toString(_p6._1);
+				case 'LastFrameSpare':
+					return _elm_lang$core$Basics$toString(_p6._1);
+				case 'OngoingStrikeFistExtra':
+					return '...';
+				case 'OngoingStrikeSecondExtra':
 					return _elm_lang$core$Basics$toString(_p6._0);
+				default:
+					return _elm_lang$core$Basics$toString(_p6._0);
+			}
+		}());
+};
+var _user$project$Bowling$drawFirstRoll = function (frame) {
+	return _elm_lang$html$Html$text(
+		function () {
+			var _p7 = frame;
+			switch (_p7.ctor) {
+				case 'EmptyFrame':
+					return '';
+				case 'OngoingFrame':
+					return _elm_lang$core$Basics$toString(_p7._0);
+				case 'NormalFrame':
+					return _elm_lang$core$Basics$toString(_p7._0);
+				case 'Spare':
+					return _elm_lang$core$Basics$toString(_p7._0);
 				case 'Strike':
 					return '10';
 				case 'OngoingSpare':
-					return _elm_lang$core$Basics$toString(_p6._0);
+					return _elm_lang$core$Basics$toString(_p7._0);
 				case 'LastFrameSpare':
-					return _elm_lang$core$Basics$toString(_p6._0);
+					return _elm_lang$core$Basics$toString(_p7._0);
 				case 'OngoingStrikeFistExtra':
 					return '10';
 				case 'OngoingStrikeSecondExtra':
@@ -8481,8 +8493,8 @@ var _user$project$Bowling$drawFrame = function (frame) {
 };
 var _user$project$Bowling$drawFrames = function (scoredFrames) {
 	var isNonEmptyFrame = function (scoredFrame) {
-		var _p7 = scoredFrame.frame;
-		if (_p7.ctor === 'EmptyFrame') {
+		var _p8 = scoredFrame.frame;
+		if (_p8.ctor === 'EmptyFrame') {
 			return false;
 		} else {
 			return true;
@@ -8595,42 +8607,42 @@ var _user$project$Bowling$startGame = A5(
 var _user$project$Bowling$model = _user$project$Bowling$startGame;
 var _user$project$Bowling$updateCurrentFrame = F3(
 	function (frame, roll, lastFrame) {
-		var _p8 = {ctor: '_Tuple3', _0: frame, _1: roll.pins, _2: lastFrame};
-		_v7_8:
+		var _p9 = {ctor: '_Tuple3', _0: frame, _1: roll.pins, _2: lastFrame};
+		_v8_8:
 		do {
-			if (_p8.ctor === '_Tuple3') {
-				switch (_p8._0.ctor) {
+			if (_p9.ctor === '_Tuple3') {
+				switch (_p9._0.ctor) {
 					case 'EmptyFrame':
-						if (_p8._1 === 10) {
-							if (_p8._2 === false) {
+						if (_p9._1 === 10) {
+							if (_p9._2 === false) {
 								return _user$project$Bowling$Strike(roll);
 							} else {
 								return _user$project$Bowling$OngoingStrikeFistExtra;
 							}
 						} else {
-							return _user$project$Bowling$OngoingFrame(_p8._1);
+							return _user$project$Bowling$OngoingFrame(_p9._1);
 						}
 					case 'OngoingStrikeFistExtra':
-						return _user$project$Bowling$OngoingStrikeSecondExtra(_p8._1);
+						return _user$project$Bowling$OngoingStrikeSecondExtra(_p9._1);
 					case 'OngoingStrikeSecondExtra':
-						return A2(_user$project$Bowling$LastFrameStrike, _p8._0._0, _p8._1);
+						return A2(_user$project$Bowling$LastFrameStrike, _p9._0._0, _p9._1);
 					case 'OngoingSpare':
-						return A3(_user$project$Bowling$LastFrameSpare, _p8._0._0, _p8._0._1, _p8._1);
+						return A3(_user$project$Bowling$LastFrameSpare, _p9._0._0, _p9._0._1, _p9._1);
 					case 'OngoingFrame':
-						if (_p8._2 === true) {
-							var _p10 = _p8._1;
-							var _p9 = _p8._0._0;
-							return _elm_lang$core$Native_Utils.eq(_p9 + _p10, 10) ? A2(_user$project$Bowling$OngoingSpare, _p9, _p10) : A2(_user$project$Bowling$NormalFrame, _p9, _p10);
+						if (_p9._2 === true) {
+							var _p11 = _p9._1;
+							var _p10 = _p9._0._0;
+							return _elm_lang$core$Native_Utils.eq(_p10 + _p11, 10) ? A2(_user$project$Bowling$OngoingSpare, _p10, _p11) : A2(_user$project$Bowling$NormalFrame, _p10, _p11);
 						} else {
-							var _p12 = _p8._1;
-							var _p11 = _p8._0._0;
-							return _elm_lang$core$Native_Utils.eq(_p11 + _p12, 10) ? A3(_user$project$Bowling$Spare, _p11, _p12, roll) : A2(_user$project$Bowling$NormalFrame, _p11, _p12);
+							var _p13 = _p9._1;
+							var _p12 = _p9._0._0;
+							return _elm_lang$core$Native_Utils.eq(_p12 + _p13, 10) ? A3(_user$project$Bowling$Spare, _p12, _p13, roll) : A2(_user$project$Bowling$NormalFrame, _p12, _p13);
 						}
 					default:
-						break _v7_8;
+						break _v8_8;
 				}
 			} else {
-				break _v7_8;
+				break _v8_8;
 			}
 		} while(false);
 		return _user$project$Bowling$EmptyFrame;
@@ -8662,9 +8674,9 @@ var _user$project$Bowling$runNewRoll = F2(
 				pins);
 			var rolls = {ctor: '::', _0: newRoll, _1: model.rolls};
 			var newFrame = A3(_user$project$Bowling$updateCurrentFrame, model.currentFrame, newRoll, lastFrame);
-			var _p13 = A2(_user$project$Bowling$updateFrames, model.aframes, newFrame);
-			var frames = _p13._0;
-			var currentFrame = _p13._1;
+			var _p14 = A2(_user$project$Bowling$updateFrames, model.aframes, newFrame);
+			var frames = _p14._0;
+			var currentFrame = _p14._1;
 			var scoredFrames = A2(
 				_user$project$Bowling$updateScoredFrames,
 				A2(
@@ -8676,65 +8688,77 @@ var _user$project$Bowling$runNewRoll = F2(
 						_1: {ctor: '[]'}
 					}),
 				rolls);
-			var feedback = _user$project$Bowling$isGameFinished(frames) ? 'End of game!' : _elm_lang$core$Basics$toString(scoredFrames);
+			var feedback = _user$project$Bowling$isGameFinished(frames) ? 'End of game!' : '';
 			return A5(_user$project$Bowling$Model, scoredFrames, frames, rolls, currentFrame, feedback);
 		}
 	});
 var _user$project$Bowling$update = F2(
 	function (msg, model) {
-		var _p14 = msg;
-		if (_p14.ctor === 'NewGame') {
+		var _p15 = msg;
+		if (_p15.ctor === 'NewGame') {
 			return _user$project$Bowling$startGame;
 		} else {
-			return A2(_user$project$Bowling$runNewRoll, model, _p14._0);
+			return A2(_user$project$Bowling$runNewRoll, model, _p15._0);
 		}
 	});
 var _user$project$Bowling$NewRoll = function (a) {
 	return {ctor: 'NewRoll', _0: a};
 };
-var _user$project$Bowling$NewGame = {ctor: 'NewGame'};
-var _user$project$Bowling$drawPanel = A2(
-	_elm_lang$html$Html$div,
-	{
-		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$class('panel'),
-		_1: {ctor: '[]'}
-	},
-	{
-		ctor: '::',
-		_0: A2(
+var _user$project$Bowling$drawButton = F2(
+	function (lessPinsThanCurrent, numberOfPins) {
+		var isEnabled = !lessPinsThanCurrent(numberOfPins);
+		return A2(
 			_elm_lang$html$Html$button,
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html_Events$onClick(_user$project$Bowling$NewGame),
-				_1: {ctor: '[]'}
+				_0: _elm_lang$html$Html_Events$onClick(
+					_user$project$Bowling$NewRoll(numberOfPins)),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$disabled(isEnabled),
+					_1: {ctor: '[]'}
+				}
 			},
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html$text('New Game'),
+				_0: _elm_lang$html$Html$text(
+					_elm_lang$core$Basics$toString(numberOfPins)),
 				_1: {ctor: '[]'}
-			}),
-		_1: A2(
-			_elm_lang$core$List$map,
-			function (i) {
-				return A2(
-					_elm_lang$html$Html$button,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Events$onClick(
-							_user$project$Bowling$NewRoll(i)),
-						_1: {ctor: '[]'}
-					},
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html$text(
-							_elm_lang$core$Basics$toString(i)),
-						_1: {ctor: '[]'}
-					});
-			},
-			A2(_elm_lang$core$List$range, 0, 10))
+			});
 	});
+var _user$project$Bowling$NewGame = {ctor: 'NewGame'};
+var _user$project$Bowling$drawPanel = function (lessPinsThanCurrent) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('panel'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$button,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Events$onClick(_user$project$Bowling$NewGame),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('New Game'),
+					_1: {ctor: '[]'}
+				}),
+			_1: A2(
+				_elm_lang$core$List$map,
+				function (i) {
+					return A2(_user$project$Bowling$drawButton, lessPinsThanCurrent, i);
+				},
+				A2(_elm_lang$core$List$range, 0, 10))
+		});
+};
 var _user$project$Bowling$view = function (model) {
+	var lessPinsThanCurrent = _user$project$Bowling$isOverMaximumPins(model.currentFrame);
 	return A2(
 		_elm_lang$html$Html$div,
 		{ctor: '[]'},
@@ -8750,7 +8774,7 @@ var _user$project$Bowling$view = function (model) {
 				_user$project$Bowling$drawFrames(model.frames)),
 			_1: {
 				ctor: '::',
-				_0: _user$project$Bowling$drawPanel,
+				_0: _user$project$Bowling$drawPanel(lessPinsThanCurrent),
 				_1: {
 					ctor: '::',
 					_0: A2(
