@@ -21,11 +21,17 @@ type Frame
     | NormalFrame Pins Pins
     | Spare Pins Pins Roll
     | Strike Roll
+    | OngoingSpare Pins Pins
+    | LastFrameSpare Pins Pins Pins
+    | OngoingStrikeFistExtra
+    | OngoingStrikeSecondExtra Pins
+    | LastFrameStrike Pins Pins
 
 
 type alias ScoredFrame =
     { frame : Frame
     , score : Int
+    , sumScore : Int
     }
 
 
@@ -50,11 +56,11 @@ emptyFrame =
 
 
 frames =
-    [ (ScoredFrame strikeFrame 10)
-    , (ScoredFrame spareFrame 10)
-    , (ScoredFrame normalFrame 3)
-    , (ScoredFrame ongoingFrame 1)
-    , (ScoredFrame emptyFrame 0)
+    [ (ScoredFrame strikeFrame 10 10)
+    , (ScoredFrame spareFrame 10 20)
+    , (ScoredFrame normalFrame 3 33)
+    , (ScoredFrame ongoingFrame 1 34)
+    , (ScoredFrame emptyFrame 0 34)
     ]
 
 
@@ -74,6 +80,21 @@ drawFirstRoll frame =
                 toString pins
 
             Strike _ ->
+                "10"
+
+            OngoingSpare pins _ ->
+                toString pins
+
+            LastFrameSpare pins _ _ ->
+                toString pins
+
+            OngoingStrikeFistExtra ->
+                "10"
+
+            OngoingStrikeSecondExtra _ ->
+                "10"
+
+            LastFrameStrike _ _ ->
                 "10"
         )
 
@@ -95,13 +116,28 @@ drawSecondRoll frame =
 
             Strike _ ->
                 "X"
+
+            OngoingSpare _ pins ->
+                toString pins
+
+            LastFrameSpare _ pins _ ->
+                toString pins
+
+            OngoingStrikeFistExtra ->
+                "..."
+
+            OngoingStrikeSecondExtra pins ->
+                toString pins
+
+            LastFrameStrike pins _ ->
+                toString pins
         )
 
 
 drawFrame frame =
     div [ class "frame" ]
         [ div [ class "score-frame" ]
-            [ (text (toString frame.score)) ]
+            [ (text (toString frame.sumScore)) ]
         , div [ class "score-rolls" ]
             [ div [ class "roll" ]
                 [ (drawFirstRoll frame.frame)
@@ -113,8 +149,20 @@ drawFrame frame =
         ]
 
 
-drawFrames frames =
-    List.map drawFrame frames
+drawFrames scoredFrames =
+    let
+        isNonEmptyFrame scoredFrame =
+            case scoredFrame.frame of
+                EmptyFrame ->
+                    False
+
+                _ ->
+                    True
+
+        nonEmptyScoredFrames =
+            List.filter isNonEmptyFrame scoredFrames
+    in
+        List.map drawFrame nonEmptyScoredFrames
 
 
 drawPanel =
@@ -154,34 +202,15 @@ main =
 view model =
     div []
         [ div [ class "score" ]
-            (drawFrames (model.frames ++ [ (ScoredFrame model.currentFrame 0) ]))
+            (drawFrames model.frames)
         , drawPanel
-        , p [] [ (text ("Last: " ++ model.feedback)) ]
+        , p [] [ (text model.feedback) ]
         ]
 
 
 type Msg
     = NewGame
     | NewRoll Int
-
-
-updateCurrentFrame : Frame -> Roll -> Frame
-updateCurrentFrame frame roll =
-    case ( frame, roll.pins ) of
-        ( EmptyFrame, 10 ) ->
-            Strike roll
-
-        ( EmptyFrame, f ) ->
-            OngoingFrame f
-
-        ( OngoingFrame f, s ) ->
-            if f + s == 10 then
-                Spare f s roll
-            else
-                NormalFrame f s
-
-        _ ->
-            EmptyFrame
 
 
 isFrameComplete frame =
@@ -192,16 +221,35 @@ isFrameComplete frame =
         OngoingFrame _ ->
             False
 
+        OngoingSpare _ _ ->
+            False
+
+        OngoingStrikeFistExtra ->
+            False
+
+        OngoingStrikeSecondExtra _ ->
+            False
+
         _ ->
             True
 
 
-updateFrames : List Frame -> Frame -> ( List Frame, Frame )
-updateFrames frames current =
-    if isFrameComplete current then
-        ( frames ++ [ current ], EmptyFrame )
-    else
-        ( frames, current )
+isGameFinished : List Frame -> Bool
+isGameFinished frames =
+    let
+        completedFrames =
+            List.length (List.filter (\f -> isFrameComplete f) frames)
+    in
+        completedFrames == 10
+
+
+isLastFrame : List Frame -> Bool
+isLastFrame frames =
+    let
+        completedFrames =
+            List.length (List.filter (\f -> isFrameComplete f) frames)
+    in
+        completedFrames == 9
 
 
 rollScore : List Roll -> Int -> Int
@@ -221,7 +269,7 @@ rollScore rolls number =
                 0
 
 
-calcFrameScore : Frame -> List Roll -> ScoredFrame
+calcFrameScore : Frame -> List Roll -> Int
 calcFrameScore frame rolls =
     let
         score =
@@ -240,37 +288,133 @@ calcFrameScore frame rolls =
 
                 EmptyFrame ->
                     0
+
+                OngoingSpare f s ->
+                    f + s
+
+                LastFrameSpare f s t ->
+                    f + s + t
+
+                OngoingStrikeFistExtra ->
+                    10
+
+                OngoingStrikeSecondExtra s ->
+                    10 + s
+
+                LastFrameStrike s t ->
+                    10 + s + t
     in
-        ScoredFrame frame score
+        score
+
+
+accumScores : Int -> List ( Int, Int ) -> List ( Int, Int )
+accumScores score others =
+    let
+        lastElem =
+            List.head others
+
+        lastScore =
+            case lastElem of
+                Just ( score, elem ) ->
+                    score
+
+                Nothing ->
+                    0
+    in
+        ( lastScore + score, score ) :: others
 
 
 updateScoredFrames : List Frame -> List Roll -> List ScoredFrame
 updateScoredFrames frames rolls =
-    List.map (\f -> calcFrameScore f rolls) frames
+    let
+        scores =
+            List.map (\f -> calcFrameScore f rolls) frames
+
+        acummulatedScores =
+            List.map Tuple.first (List.reverse (List.foldl accumScores [] scores))
+
+        scoredFrames =
+            List.map3 ScoredFrame frames scores acummulatedScores
+    in
+        scoredFrames
+
+
+updateCurrentFrame : Frame -> Roll -> Bool -> Frame
+updateCurrentFrame frame roll lastFrame =
+    case ( frame, roll.pins, lastFrame ) of
+        ( EmptyFrame, 10, False ) ->
+            Strike roll
+
+        ( EmptyFrame, 10, True ) ->
+            OngoingStrikeFistExtra
+
+        ( EmptyFrame, f, _ ) ->
+            OngoingFrame f
+
+        ( OngoingStrikeFistExtra, pins, _ ) ->
+            OngoingStrikeSecondExtra pins
+
+        ( OngoingStrikeSecondExtra f, s, _ ) ->
+            LastFrameStrike f s
+
+        ( OngoingSpare f s, t, _ ) ->
+            LastFrameSpare f s t
+
+        ( OngoingFrame f, s, True ) ->
+            if f + s == 10 then
+                OngoingSpare f s
+            else
+                NormalFrame f s
+
+        ( OngoingFrame f, s, False ) ->
+            if f + s == 10 then
+                Spare f s roll
+            else
+                NormalFrame f s
+
+        _ ->
+            EmptyFrame
+
+
+updateFrames : List Frame -> Frame -> ( List Frame, Frame )
+updateFrames frames current =
+    if isFrameComplete current then
+        ( frames ++ [ current ], EmptyFrame )
+    else
+        ( frames, current )
 
 
 runNewRoll : Model -> Pins -> Model
 runNewRoll model pins =
-    let
-        newRoll =
-            Roll (List.length model.rolls + 1) pins
+    if isGameFinished model.aframes then
+        model
+    else
+        let
+            newRoll =
+                Roll (List.length model.rolls + 1) pins
 
-        rolls =
-            newRoll :: model.rolls
+            rolls =
+                newRoll :: model.rolls
 
-        newFrame =
-            updateCurrentFrame model.currentFrame newRoll
+            lastFrame =
+                isLastFrame model.aframes
 
-        ( frames, currentFrame ) =
-            updateFrames model.aframes newFrame
+            newFrame =
+                updateCurrentFrame model.currentFrame newRoll lastFrame
 
-        scoredFrames =
-            updateScoredFrames frames rolls
+            ( frames, currentFrame ) =
+                updateFrames model.aframes newFrame
 
-        feedback =
-            toString (frames ++ [ currentFrame ])
-    in
-        Model scoredFrames frames rolls currentFrame feedback
+            scoredFrames =
+                updateScoredFrames (frames ++ [ currentFrame ]) rolls
+
+            feedback =
+                if isGameFinished frames then
+                    "End of game!"
+                else
+                    toString scoredFrames
+        in
+            Model scoredFrames frames rolls currentFrame feedback
 
 
 update : Msg -> Model -> Model

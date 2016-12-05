@@ -8256,6 +8256,23 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
+var _user$project$Bowling$accumScores = F2(
+	function (score, others) {
+		var lastElem = _elm_lang$core$List$head(others);
+		var lastScore = function () {
+			var _p0 = lastElem;
+			if (_p0.ctor === 'Just') {
+				return _p0._0._0;
+			} else {
+				return 0;
+			}
+		}();
+		return {
+			ctor: '::',
+			_0: {ctor: '_Tuple2', _0: lastScore + score, _1: score},
+			_1: others
+		};
+	});
 var _user$project$Bowling$rollScore = F2(
 	function (rolls, number) {
 		var foundRolls = A2(
@@ -8265,55 +8282,131 @@ var _user$project$Bowling$rollScore = F2(
 			},
 			rolls);
 		var foundRoll = _elm_lang$core$List$head(foundRolls);
-		var _p0 = foundRoll;
-		if (_p0.ctor === 'Just') {
-			return _p0._0.pins;
+		var _p1 = foundRoll;
+		if (_p1.ctor === 'Just') {
+			return _p1._0.pins;
 		} else {
 			return 0;
 		}
 	});
+var _user$project$Bowling$calcFrameScore = F2(
+	function (frame, rolls) {
+		var score = function () {
+			var _p2 = frame;
+			switch (_p2.ctor) {
+				case 'Strike':
+					var _p3 = _p2._0;
+					return (10 + A2(_user$project$Bowling$rollScore, rolls, _p3.rollNumber + 1)) + A2(_user$project$Bowling$rollScore, rolls, _p3.rollNumber + 2);
+				case 'Spare':
+					return 10 + A2(_user$project$Bowling$rollScore, rolls, _p2._2.rollNumber + 1);
+				case 'NormalFrame':
+					return _p2._0 + _p2._1;
+				case 'OngoingFrame':
+					return _p2._0;
+				case 'EmptyFrame':
+					return 0;
+				case 'OngoingSpare':
+					return _p2._0 + _p2._1;
+				case 'LastFrameSpare':
+					return (_p2._0 + _p2._1) + _p2._2;
+				case 'OngoingStrikeFistExtra':
+					return 10;
+				case 'OngoingStrikeSecondExtra':
+					return 10 + _p2._0;
+				default:
+					return (10 + _p2._0) + _p2._1;
+			}
+		}();
+		return score;
+	});
 var _user$project$Bowling$isFrameComplete = function (frame) {
-	var _p1 = frame;
-	switch (_p1.ctor) {
+	var _p4 = frame;
+	switch (_p4.ctor) {
 		case 'EmptyFrame':
 			return false;
 		case 'OngoingFrame':
+			return false;
+		case 'OngoingSpare':
+			return false;
+		case 'OngoingStrikeFistExtra':
+			return false;
+		case 'OngoingStrikeSecondExtra':
 			return false;
 		default:
 			return true;
 	}
 };
+var _user$project$Bowling$isGameFinished = function (frames) {
+	var completedFrames = _elm_lang$core$List$length(
+		A2(
+			_elm_lang$core$List$filter,
+			function (f) {
+				return _user$project$Bowling$isFrameComplete(f);
+			},
+			frames));
+	return _elm_lang$core$Native_Utils.eq(completedFrames, 10);
+};
+var _user$project$Bowling$isLastFrame = function (frames) {
+	var completedFrames = _elm_lang$core$List$length(
+		A2(
+			_elm_lang$core$List$filter,
+			function (f) {
+				return _user$project$Bowling$isFrameComplete(f);
+			},
+			frames));
+	return _elm_lang$core$Native_Utils.eq(completedFrames, 9);
+};
 var _user$project$Bowling$drawSecondRoll = function (frame) {
 	return _elm_lang$html$Html$text(
 		function () {
-			var _p2 = frame;
-			switch (_p2.ctor) {
+			var _p5 = frame;
+			switch (_p5.ctor) {
 				case 'EmptyFrame':
 					return '';
 				case 'OngoingFrame':
 					return '';
 				case 'NormalFrame':
-					return _elm_lang$core$Basics$toString(_p2._1);
+					return _elm_lang$core$Basics$toString(_p5._1);
 				case 'Spare':
-					return _elm_lang$core$Basics$toString(_p2._1);
-				default:
+					return _elm_lang$core$Basics$toString(_p5._1);
+				case 'Strike':
 					return 'X';
+				case 'OngoingSpare':
+					return _elm_lang$core$Basics$toString(_p5._1);
+				case 'LastFrameSpare':
+					return _elm_lang$core$Basics$toString(_p5._1);
+				case 'OngoingStrikeFistExtra':
+					return '...';
+				case 'OngoingStrikeSecondExtra':
+					return _elm_lang$core$Basics$toString(_p5._0);
+				default:
+					return _elm_lang$core$Basics$toString(_p5._0);
 			}
 		}());
 };
 var _user$project$Bowling$drawFirstRoll = function (frame) {
 	return _elm_lang$html$Html$text(
 		function () {
-			var _p3 = frame;
-			switch (_p3.ctor) {
+			var _p6 = frame;
+			switch (_p6.ctor) {
 				case 'EmptyFrame':
 					return '';
 				case 'OngoingFrame':
-					return _elm_lang$core$Basics$toString(_p3._0);
+					return _elm_lang$core$Basics$toString(_p6._0);
 				case 'NormalFrame':
-					return _elm_lang$core$Basics$toString(_p3._0);
+					return _elm_lang$core$Basics$toString(_p6._0);
 				case 'Spare':
-					return _elm_lang$core$Basics$toString(_p3._0);
+					return _elm_lang$core$Basics$toString(_p6._0);
+				case 'Strike':
+					return '10';
+				case 'OngoingSpare':
+					return _elm_lang$core$Basics$toString(_p6._0);
+				case 'LastFrameSpare':
+					return _elm_lang$core$Basics$toString(_p6._0);
+				case 'OngoingStrikeFistExtra':
+					return '10';
+				case 'OngoingStrikeSecondExtra':
+					return '10';
 				default:
 					return '10';
 			}
@@ -8339,7 +8432,7 @@ var _user$project$Bowling$drawFrame = function (frame) {
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(frame.score)),
+						_elm_lang$core$Basics$toString(frame.sumScore)),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
@@ -8386,49 +8479,65 @@ var _user$project$Bowling$drawFrame = function (frame) {
 			}
 		});
 };
-var _user$project$Bowling$drawFrames = function (frames) {
-	return A2(_elm_lang$core$List$map, _user$project$Bowling$drawFrame, frames);
+var _user$project$Bowling$drawFrames = function (scoredFrames) {
+	var isNonEmptyFrame = function (scoredFrame) {
+		var _p7 = scoredFrame.frame;
+		if (_p7.ctor === 'EmptyFrame') {
+			return false;
+		} else {
+			return true;
+		}
+	};
+	var nonEmptyScoredFrames = A2(_elm_lang$core$List$filter, isNonEmptyFrame, scoredFrames);
+	return A2(_elm_lang$core$List$map, _user$project$Bowling$drawFrame, nonEmptyScoredFrames);
 };
 var _user$project$Bowling$Roll = F2(
 	function (a, b) {
 		return {rollNumber: a, pins: b};
 	});
-var _user$project$Bowling$ScoredFrame = F2(
-	function (a, b) {
-		return {frame: a, score: b};
-	});
-var _user$project$Bowling$calcFrameScore = F2(
-	function (frame, rolls) {
-		var score = function () {
-			var _p4 = frame;
-			switch (_p4.ctor) {
-				case 'Strike':
-					var _p5 = _p4._0;
-					return (10 + A2(_user$project$Bowling$rollScore, rolls, _p5.rollNumber + 1)) + A2(_user$project$Bowling$rollScore, rolls, _p5.rollNumber + 2);
-				case 'Spare':
-					return 10 + A2(_user$project$Bowling$rollScore, rolls, _p4._2.rollNumber + 1);
-				case 'NormalFrame':
-					return _p4._0 + _p4._1;
-				case 'OngoingFrame':
-					return _p4._0;
-				default:
-					return 0;
-			}
-		}();
-		return A2(_user$project$Bowling$ScoredFrame, frame, score);
+var _user$project$Bowling$ScoredFrame = F3(
+	function (a, b, c) {
+		return {frame: a, score: b, sumScore: c};
 	});
 var _user$project$Bowling$updateScoredFrames = F2(
 	function (frames, rolls) {
-		return A2(
+		var scores = A2(
 			_elm_lang$core$List$map,
 			function (f) {
 				return A2(_user$project$Bowling$calcFrameScore, f, rolls);
 			},
 			frames);
+		var acummulatedScores = A2(
+			_elm_lang$core$List$map,
+			_elm_lang$core$Tuple$first,
+			_elm_lang$core$List$reverse(
+				A3(
+					_elm_lang$core$List$foldl,
+					_user$project$Bowling$accumScores,
+					{ctor: '[]'},
+					scores)));
+		var scoredFrames = A4(_elm_lang$core$List$map3, _user$project$Bowling$ScoredFrame, frames, scores, acummulatedScores);
+		return scoredFrames;
 	});
 var _user$project$Bowling$Model = F5(
 	function (a, b, c, d, e) {
 		return {frames: a, aframes: b, rolls: c, currentFrame: d, feedback: e};
+	});
+var _user$project$Bowling$LastFrameStrike = F2(
+	function (a, b) {
+		return {ctor: 'LastFrameStrike', _0: a, _1: b};
+	});
+var _user$project$Bowling$OngoingStrikeSecondExtra = function (a) {
+	return {ctor: 'OngoingStrikeSecondExtra', _0: a};
+};
+var _user$project$Bowling$OngoingStrikeFistExtra = {ctor: 'OngoingStrikeFistExtra'};
+var _user$project$Bowling$LastFrameSpare = F3(
+	function (a, b, c) {
+		return {ctor: 'LastFrameSpare', _0: a, _1: b, _2: c};
+	});
+var _user$project$Bowling$OngoingSpare = F2(
+	function (a, b) {
+		return {ctor: 'OngoingSpare', _0: a, _1: b};
 	});
 var _user$project$Bowling$Strike = function (a) {
 	return {ctor: 'Strike', _0: a};
@@ -8457,19 +8566,19 @@ var _user$project$Bowling$EmptyFrame = {ctor: 'EmptyFrame'};
 var _user$project$Bowling$emptyFrame = _user$project$Bowling$EmptyFrame;
 var _user$project$Bowling$frames = {
 	ctor: '::',
-	_0: A2(_user$project$Bowling$ScoredFrame, _user$project$Bowling$strikeFrame, 10),
+	_0: A3(_user$project$Bowling$ScoredFrame, _user$project$Bowling$strikeFrame, 10, 10),
 	_1: {
 		ctor: '::',
-		_0: A2(_user$project$Bowling$ScoredFrame, _user$project$Bowling$spareFrame, 10),
+		_0: A3(_user$project$Bowling$ScoredFrame, _user$project$Bowling$spareFrame, 10, 20),
 		_1: {
 			ctor: '::',
-			_0: A2(_user$project$Bowling$ScoredFrame, _user$project$Bowling$normalFrame, 3),
+			_0: A3(_user$project$Bowling$ScoredFrame, _user$project$Bowling$normalFrame, 3, 33),
 			_1: {
 				ctor: '::',
-				_0: A2(_user$project$Bowling$ScoredFrame, _user$project$Bowling$ongoingFrame, 1),
+				_0: A3(_user$project$Bowling$ScoredFrame, _user$project$Bowling$ongoingFrame, 1, 34),
 				_1: {
 					ctor: '::',
-					_0: A2(_user$project$Bowling$ScoredFrame, _user$project$Bowling$emptyFrame, 0),
+					_0: A3(_user$project$Bowling$ScoredFrame, _user$project$Bowling$emptyFrame, 0, 34),
 					_1: {ctor: '[]'}
 				}
 			}
@@ -8484,28 +8593,44 @@ var _user$project$Bowling$startGame = A5(
 	_user$project$Bowling$EmptyFrame,
 	'');
 var _user$project$Bowling$model = _user$project$Bowling$startGame;
-var _user$project$Bowling$updateCurrentFrame = F2(
-	function (frame, roll) {
-		var _p6 = {ctor: '_Tuple2', _0: frame, _1: roll.pins};
-		_v5_3:
+var _user$project$Bowling$updateCurrentFrame = F3(
+	function (frame, roll, lastFrame) {
+		var _p8 = {ctor: '_Tuple3', _0: frame, _1: roll.pins, _2: lastFrame};
+		_v7_8:
 		do {
-			if (_p6.ctor === '_Tuple2') {
-				switch (_p6._0.ctor) {
+			if (_p8.ctor === '_Tuple3') {
+				switch (_p8._0.ctor) {
 					case 'EmptyFrame':
-						if (_p6._1 === 10) {
-							return _user$project$Bowling$Strike(roll);
+						if (_p8._1 === 10) {
+							if (_p8._2 === false) {
+								return _user$project$Bowling$Strike(roll);
+							} else {
+								return _user$project$Bowling$OngoingStrikeFistExtra;
+							}
 						} else {
-							return _user$project$Bowling$OngoingFrame(_p6._1);
+							return _user$project$Bowling$OngoingFrame(_p8._1);
 						}
+					case 'OngoingStrikeFistExtra':
+						return _user$project$Bowling$OngoingStrikeSecondExtra(_p8._1);
+					case 'OngoingStrikeSecondExtra':
+						return A2(_user$project$Bowling$LastFrameStrike, _p8._0._0, _p8._1);
+					case 'OngoingSpare':
+						return A3(_user$project$Bowling$LastFrameSpare, _p8._0._0, _p8._0._1, _p8._1);
 					case 'OngoingFrame':
-						var _p8 = _p6._1;
-						var _p7 = _p6._0._0;
-						return _elm_lang$core$Native_Utils.eq(_p7 + _p8, 10) ? A3(_user$project$Bowling$Spare, _p7, _p8, roll) : A2(_user$project$Bowling$NormalFrame, _p7, _p8);
+						if (_p8._2 === true) {
+							var _p10 = _p8._1;
+							var _p9 = _p8._0._0;
+							return _elm_lang$core$Native_Utils.eq(_p9 + _p10, 10) ? A2(_user$project$Bowling$OngoingSpare, _p9, _p10) : A2(_user$project$Bowling$NormalFrame, _p9, _p10);
+						} else {
+							var _p12 = _p8._1;
+							var _p11 = _p8._0._0;
+							return _elm_lang$core$Native_Utils.eq(_p11 + _p12, 10) ? A3(_user$project$Bowling$Spare, _p11, _p12, roll) : A2(_user$project$Bowling$NormalFrame, _p11, _p12);
+						}
 					default:
-						break _v5_3;
+						break _v7_8;
 				}
 			} else {
-				break _v5_3;
+				break _v7_8;
 			}
 		} while(false);
 		return _user$project$Bowling$EmptyFrame;
@@ -8527,34 +8652,41 @@ var _user$project$Bowling$updateFrames = F2(
 	});
 var _user$project$Bowling$runNewRoll = F2(
 	function (model, pins) {
-		var newRoll = A2(
-			_user$project$Bowling$Roll,
-			_elm_lang$core$List$length(model.rolls) + 1,
-			pins);
-		var rolls = {ctor: '::', _0: newRoll, _1: model.rolls};
-		var newFrame = A2(_user$project$Bowling$updateCurrentFrame, model.currentFrame, newRoll);
-		var _p9 = A2(_user$project$Bowling$updateFrames, model.aframes, newFrame);
-		var frames = _p9._0;
-		var currentFrame = _p9._1;
-		var scoredFrames = A2(_user$project$Bowling$updateScoredFrames, frames, rolls);
-		var feedback = _elm_lang$core$Basics$toString(
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				frames,
-				{
-					ctor: '::',
-					_0: currentFrame,
-					_1: {ctor: '[]'}
-				}));
-		return A5(_user$project$Bowling$Model, scoredFrames, frames, rolls, currentFrame, feedback);
+		if (_user$project$Bowling$isGameFinished(model.aframes)) {
+			return model;
+		} else {
+			var lastFrame = _user$project$Bowling$isLastFrame(model.aframes);
+			var newRoll = A2(
+				_user$project$Bowling$Roll,
+				_elm_lang$core$List$length(model.rolls) + 1,
+				pins);
+			var rolls = {ctor: '::', _0: newRoll, _1: model.rolls};
+			var newFrame = A3(_user$project$Bowling$updateCurrentFrame, model.currentFrame, newRoll, lastFrame);
+			var _p13 = A2(_user$project$Bowling$updateFrames, model.aframes, newFrame);
+			var frames = _p13._0;
+			var currentFrame = _p13._1;
+			var scoredFrames = A2(
+				_user$project$Bowling$updateScoredFrames,
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					frames,
+					{
+						ctor: '::',
+						_0: currentFrame,
+						_1: {ctor: '[]'}
+					}),
+				rolls);
+			var feedback = _user$project$Bowling$isGameFinished(frames) ? 'End of game!' : _elm_lang$core$Basics$toString(scoredFrames);
+			return A5(_user$project$Bowling$Model, scoredFrames, frames, rolls, currentFrame, feedback);
+		}
 	});
 var _user$project$Bowling$update = F2(
 	function (msg, model) {
-		var _p10 = msg;
-		if (_p10.ctor === 'NewGame') {
+		var _p14 = msg;
+		if (_p14.ctor === 'NewGame') {
 			return _user$project$Bowling$startGame;
 		} else {
-			return A2(_user$project$Bowling$runNewRoll, model, _p10._0);
+			return A2(_user$project$Bowling$runNewRoll, model, _p14._0);
 		}
 	});
 var _user$project$Bowling$NewRoll = function (a) {
@@ -8615,15 +8747,7 @@ var _user$project$Bowling$view = function (model) {
 					_0: _elm_lang$html$Html_Attributes$class('score'),
 					_1: {ctor: '[]'}
 				},
-				_user$project$Bowling$drawFrames(
-					A2(
-						_elm_lang$core$Basics_ops['++'],
-						model.frames,
-						{
-							ctor: '::',
-							_0: A2(_user$project$Bowling$ScoredFrame, model.currentFrame, 0),
-							_1: {ctor: '[]'}
-						}))),
+				_user$project$Bowling$drawFrames(model.frames)),
 			_1: {
 				ctor: '::',
 				_0: _user$project$Bowling$drawPanel,
@@ -8634,8 +8758,7 @@ var _user$project$Bowling$view = function (model) {
 						{ctor: '[]'},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text(
-								A2(_elm_lang$core$Basics_ops['++'], 'Last: ', model.feedback)),
+							_0: _elm_lang$html$Html$text(model.feedback),
 							_1: {ctor: '[]'}
 						}),
 					_1: {ctor: '[]'}
