@@ -8368,35 +8368,25 @@ var _user$project$Bowling$isOverMaximumPins = F2(
 		}();
 		return _elm_lang$core$Native_Utils.cmp(currentPin + newPin, 10) < 1;
 	});
-var _user$project$Bowling$drawSecondRoll = function (frame) {
+var _user$project$Bowling$drawThirdRoll = function (frame) {
 	return _elm_lang$html$Html$text(
 		function () {
 			var _p6 = frame;
 			switch (_p6.ctor) {
-				case 'EmptyFrame':
-					return '';
-				case 'OngoingFrame':
-					return '';
-				case 'NormalFrame':
-					return _elm_lang$core$Basics$toString(_p6._1);
-				case 'Spare':
-					return _elm_lang$core$Basics$toString(_p6._1);
-				case 'Strike':
-					return 'X';
 				case 'OngoingSpare':
-					return _elm_lang$core$Basics$toString(_p6._1);
-				case 'LastFrameSpare':
-					return _elm_lang$core$Basics$toString(_p6._1);
-				case 'OngoingStrikeFistExtra':
 					return '...';
+				case 'LastFrameSpare':
+					return _elm_lang$core$Basics$toString(_p6._2);
 				case 'OngoingStrikeSecondExtra':
-					return _elm_lang$core$Basics$toString(_p6._0);
+					return '...';
+				case 'LastFrameStrike':
+					return _elm_lang$core$Basics$toString(_p6._1);
 				default:
-					return _elm_lang$core$Basics$toString(_p6._0);
+					return '';
 			}
 		}());
 };
-var _user$project$Bowling$drawFirstRoll = function (frame) {
+var _user$project$Bowling$drawSecondRoll = function (frame) {
 	return _elm_lang$html$Html$text(
 		function () {
 			var _p7 = frame;
@@ -8404,17 +8394,45 @@ var _user$project$Bowling$drawFirstRoll = function (frame) {
 				case 'EmptyFrame':
 					return '';
 				case 'OngoingFrame':
-					return _elm_lang$core$Basics$toString(_p7._0);
+					return '';
 				case 'NormalFrame':
-					return _elm_lang$core$Basics$toString(_p7._0);
+					return _elm_lang$core$Basics$toString(_p7._1);
 				case 'Spare':
+					return _elm_lang$core$Basics$toString(_p7._1);
+				case 'Strike':
+					return 'X';
+				case 'OngoingSpare':
+					return _elm_lang$core$Basics$toString(_p7._1);
+				case 'LastFrameSpare':
+					return _elm_lang$core$Basics$toString(_p7._1);
+				case 'OngoingStrikeFistExtra':
+					return '...';
+				case 'OngoingStrikeSecondExtra':
 					return _elm_lang$core$Basics$toString(_p7._0);
+				default:
+					return _elm_lang$core$Basics$toString(_p7._0);
+			}
+		}());
+};
+var _user$project$Bowling$drawFirstRoll = function (frame) {
+	return _elm_lang$html$Html$text(
+		function () {
+			var _p8 = frame;
+			switch (_p8.ctor) {
+				case 'EmptyFrame':
+					return '';
+				case 'OngoingFrame':
+					return _elm_lang$core$Basics$toString(_p8._0);
+				case 'NormalFrame':
+					return _elm_lang$core$Basics$toString(_p8._0);
+				case 'Spare':
+					return _elm_lang$core$Basics$toString(_p8._0);
 				case 'Strike':
 					return '10';
 				case 'OngoingSpare':
-					return _elm_lang$core$Basics$toString(_p7._0);
+					return _elm_lang$core$Basics$toString(_p8._0);
 				case 'LastFrameSpare':
-					return _elm_lang$core$Basics$toString(_p7._0);
+					return _elm_lang$core$Basics$toString(_p8._0);
 				case 'OngoingStrikeFistExtra':
 					return '10';
 				case 'OngoingStrikeSecondExtra':
@@ -8424,7 +8442,13 @@ var _user$project$Bowling$drawFirstRoll = function (frame) {
 			}
 		}());
 };
-var _user$project$Bowling$drawFrame = function (frame) {
+var _user$project$Bowling$drawFrame = function (scoredFrame) {
+	var shouldDisplayThirdRoll = !_elm_lang$core$Native_Utils.eq(
+		_user$project$Bowling$drawThirdRoll(scoredFrame.frame),
+		_elm_lang$html$Html$text(''));
+	var displayStyleInThirdRoll = shouldDisplayThirdRoll ? '' : 'None';
+	var rollClass = shouldDisplayThirdRoll ? 'smallRoll' : 'roll';
+	var frame = scoredFrame.frame;
 	return A2(
 		_elm_lang$html$Html$div,
 		{
@@ -8444,7 +8468,7 @@ var _user$project$Bowling$drawFrame = function (frame) {
 				{
 					ctor: '::',
 					_0: _elm_lang$html$Html$text(
-						_elm_lang$core$Basics$toString(frame.sumScore)),
+						_elm_lang$core$Basics$toString(scoredFrame.sumScore)),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
@@ -8462,12 +8486,12 @@ var _user$project$Bowling$drawFrame = function (frame) {
 							_elm_lang$html$Html$div,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('roll'),
+								_0: _elm_lang$html$Html_Attributes$class(rollClass),
 								_1: {ctor: '[]'}
 							},
 							{
 								ctor: '::',
-								_0: _user$project$Bowling$drawFirstRoll(frame.frame),
+								_0: _user$project$Bowling$drawFirstRoll(frame),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
@@ -8476,15 +8500,39 @@ var _user$project$Bowling$drawFrame = function (frame) {
 								_elm_lang$html$Html$div,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('roll'),
+									_0: _elm_lang$html$Html_Attributes$class(rollClass),
 									_1: {ctor: '[]'}
 								},
 								{
 									ctor: '::',
-									_0: _user$project$Bowling$drawSecondRoll(frame.frame),
+									_0: _user$project$Bowling$drawSecondRoll(frame),
 									_1: {ctor: '[]'}
 								}),
-							_1: {ctor: '[]'}
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$class(rollClass),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$style(
+												{
+													ctor: '::',
+													_0: {ctor: '_Tuple2', _0: 'display', _1: displayStyleInThirdRoll},
+													_1: {ctor: '[]'}
+												}),
+											_1: {ctor: '[]'}
+										}
+									},
+									{
+										ctor: '::',
+										_0: _user$project$Bowling$drawThirdRoll(frame),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
 						}
 					}),
 				_1: {ctor: '[]'}
@@ -8493,8 +8541,8 @@ var _user$project$Bowling$drawFrame = function (frame) {
 };
 var _user$project$Bowling$drawFrames = function (scoredFrames) {
 	var isNonEmptyFrame = function (scoredFrame) {
-		var _p8 = scoredFrame.frame;
-		if (_p8.ctor === 'EmptyFrame') {
+		var _p9 = scoredFrame.frame;
+		if (_p9.ctor === 'EmptyFrame') {
 			return false;
 		} else {
 			return true;
@@ -8607,42 +8655,42 @@ var _user$project$Bowling$startGame = A5(
 var _user$project$Bowling$model = _user$project$Bowling$startGame;
 var _user$project$Bowling$updateCurrentFrame = F3(
 	function (frame, roll, lastFrame) {
-		var _p9 = {ctor: '_Tuple3', _0: frame, _1: roll.pins, _2: lastFrame};
-		_v8_8:
+		var _p10 = {ctor: '_Tuple3', _0: frame, _1: roll.pins, _2: lastFrame};
+		_v9_8:
 		do {
-			if (_p9.ctor === '_Tuple3') {
-				switch (_p9._0.ctor) {
+			if (_p10.ctor === '_Tuple3') {
+				switch (_p10._0.ctor) {
 					case 'EmptyFrame':
-						if (_p9._1 === 10) {
-							if (_p9._2 === false) {
+						if (_p10._1 === 10) {
+							if (_p10._2 === false) {
 								return _user$project$Bowling$Strike(roll);
 							} else {
 								return _user$project$Bowling$OngoingStrikeFistExtra;
 							}
 						} else {
-							return _user$project$Bowling$OngoingFrame(_p9._1);
+							return _user$project$Bowling$OngoingFrame(_p10._1);
 						}
 					case 'OngoingStrikeFistExtra':
-						return _user$project$Bowling$OngoingStrikeSecondExtra(_p9._1);
+						return _user$project$Bowling$OngoingStrikeSecondExtra(_p10._1);
 					case 'OngoingStrikeSecondExtra':
-						return A2(_user$project$Bowling$LastFrameStrike, _p9._0._0, _p9._1);
+						return A2(_user$project$Bowling$LastFrameStrike, _p10._0._0, _p10._1);
 					case 'OngoingSpare':
-						return A3(_user$project$Bowling$LastFrameSpare, _p9._0._0, _p9._0._1, _p9._1);
+						return A3(_user$project$Bowling$LastFrameSpare, _p10._0._0, _p10._0._1, _p10._1);
 					case 'OngoingFrame':
-						if (_p9._2 === true) {
-							var _p11 = _p9._1;
-							var _p10 = _p9._0._0;
-							return _elm_lang$core$Native_Utils.eq(_p10 + _p11, 10) ? A2(_user$project$Bowling$OngoingSpare, _p10, _p11) : A2(_user$project$Bowling$NormalFrame, _p10, _p11);
+						if (_p10._2 === true) {
+							var _p12 = _p10._1;
+							var _p11 = _p10._0._0;
+							return _elm_lang$core$Native_Utils.eq(_p11 + _p12, 10) ? A2(_user$project$Bowling$OngoingSpare, _p11, _p12) : A2(_user$project$Bowling$NormalFrame, _p11, _p12);
 						} else {
-							var _p13 = _p9._1;
-							var _p12 = _p9._0._0;
-							return _elm_lang$core$Native_Utils.eq(_p12 + _p13, 10) ? A3(_user$project$Bowling$Spare, _p12, _p13, roll) : A2(_user$project$Bowling$NormalFrame, _p12, _p13);
+							var _p14 = _p10._1;
+							var _p13 = _p10._0._0;
+							return _elm_lang$core$Native_Utils.eq(_p13 + _p14, 10) ? A3(_user$project$Bowling$Spare, _p13, _p14, roll) : A2(_user$project$Bowling$NormalFrame, _p13, _p14);
 						}
 					default:
-						break _v8_8;
+						break _v9_8;
 				}
 			} else {
-				break _v8_8;
+				break _v9_8;
 			}
 		} while(false);
 		return _user$project$Bowling$EmptyFrame;
@@ -8674,9 +8722,9 @@ var _user$project$Bowling$runNewRoll = F2(
 				pins);
 			var rolls = {ctor: '::', _0: newRoll, _1: model.rolls};
 			var newFrame = A3(_user$project$Bowling$updateCurrentFrame, model.currentFrame, newRoll, lastFrame);
-			var _p14 = A2(_user$project$Bowling$updateFrames, model.aframes, newFrame);
-			var frames = _p14._0;
-			var currentFrame = _p14._1;
+			var _p15 = A2(_user$project$Bowling$updateFrames, model.aframes, newFrame);
+			var frames = _p15._0;
+			var currentFrame = _p15._1;
 			var scoredFrames = A2(
 				_user$project$Bowling$updateScoredFrames,
 				A2(
@@ -8694,11 +8742,11 @@ var _user$project$Bowling$runNewRoll = F2(
 	});
 var _user$project$Bowling$update = F2(
 	function (msg, model) {
-		var _p15 = msg;
-		if (_p15.ctor === 'NewGame') {
+		var _p16 = msg;
+		if (_p16.ctor === 'NewGame') {
 			return _user$project$Bowling$startGame;
 		} else {
-			return A2(_user$project$Bowling$runNewRoll, model, _p15._0);
+			return A2(_user$project$Bowling$runNewRoll, model, _p16._0);
 		}
 	});
 var _user$project$Bowling$NewRoll = function (a) {

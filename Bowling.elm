@@ -134,19 +134,61 @@ drawSecondRoll frame =
         )
 
 
-drawFrame frame =
-    div [ class "frame" ]
-        [ div [ class "score-frame" ]
-            [ (text (toString frame.sumScore)) ]
-        , div [ class "score-rolls" ]
-            [ div [ class "roll" ]
-                [ (drawFirstRoll frame.frame)
-                ]
-            , div [ class "roll" ]
-                [ (drawSecondRoll frame.frame)
+drawThirdRoll frame =
+    text
+        (case frame of
+            OngoingSpare _ pins ->
+                "..."
+
+            LastFrameSpare _ _ pins ->
+                toString pins
+
+            OngoingStrikeSecondExtra pins ->
+                "..."
+
+            LastFrameStrike _ pins ->
+                toString pins
+
+            _ ->
+                ""
+        )
+
+
+drawFrame scoredFrame =
+    let
+        frame =
+            scoredFrame.frame
+
+        shouldDisplayThirdRoll =
+            (drawThirdRoll scoredFrame.frame) /= text ""
+
+        displayStyleInThirdRoll =
+            if shouldDisplayThirdRoll then
+                ""
+            else
+                "None"
+
+        rollClass =
+            if shouldDisplayThirdRoll then
+                "smallRoll"
+            else
+                "roll"
+    in
+        div [ class "frame" ]
+            [ div [ class "score-frame" ]
+                [ (text (toString scoredFrame.sumScore)) ]
+            , div [ class "score-rolls" ]
+                [ div [ class rollClass ]
+                    [ (drawFirstRoll frame)
+                    ]
+                , div [ class rollClass ]
+                    [ (drawSecondRoll frame)
+                    ]
+                , div [ (class rollClass), (style [ ( "display", displayStyleInThirdRoll ) ]) ]
+                    [ (drawThirdRoll frame)
+                    ]
                 ]
             ]
-        ]
 
 
 drawFrames scoredFrames =
