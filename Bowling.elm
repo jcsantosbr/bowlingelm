@@ -9,18 +9,18 @@ type alias Pins =
     Int
 
 
-type Roll
-    = EmptyRoll
-    | Skipped
-    | Rolled Pins
+type alias Roll =
+    { rollNumber : Int
+    , pins : Pins
+    }
 
 
 type Frame
     = EmptyFrame
     | OngoingFrame Pins
     | NormalFrame Pins Pins
-    | Spare Pins Pins
-    | Strike
+    | Spare Pins Pins Roll
+    | Strike Roll
 
 
 type alias ScoredFrame =
@@ -30,11 +30,11 @@ type alias ScoredFrame =
 
 
 strikeFrame =
-    Strike
+    Strike (Roll 1 10)
 
 
 spareFrame =
-    Spare 4 6
+    Spare 4 6 (Roll 2 6)
 
 
 normalFrame =
@@ -70,10 +70,10 @@ drawFirstRoll frame =
             NormalFrame pins _ ->
                 toString pins
 
-            Spare pins _ ->
+            Spare pins _ _ ->
                 toString pins
 
-            Strike ->
+            Strike _ ->
                 "10"
         )
 
@@ -90,10 +90,10 @@ drawSecondRoll frame =
             NormalFrame _ pins ->
                 toString pins
 
-            Spare _ pins ->
+            Spare _ pins _ ->
                 toString pins
 
-            Strike ->
+            Strike _ ->
                 "X"
         )
 
@@ -122,7 +122,7 @@ drawPanel =
         ((button [ onClick NewGame ] [ text "New Game" ])
             :: (List.map
                     (\i ->
-                        button [ (onClick (Roll i)) ]
+                        button [ (onClick (NewRoll i)) ]
                             [ text (toString i) ]
                     )
                     (List.range 0 10)
@@ -132,14 +132,15 @@ drawPanel =
 
 type alias Model =
     { frames : List ScoredFrame
-    , plays : List Pins
+    , aframes : List Frame
+    , rolls : List Roll
     , currentFrame : Frame
     , feedback : String
     }
 
 
 startGame =
-    Model [] [] ""
+    Model [] [] [] EmptyFrame ""
 
 
 model =
@@ -153,7 +154,7 @@ main =
 view model =
     div []
         [ div [ class "score" ]
-            (drawFrames model.frames)
+            (drawFrames (model.frames ++ [ (ScoredFrame model.currentFrame 0) ]))
         , drawPanel
         , p [] [ (text ("Last: " ++ model.feedback)) ]
         ]
@@ -161,49 +162,115 @@ view model =
 
 type Msg
     = NewGame
-    | Roll Int
+    | NewRoll Int
 
 
-playsToFramedRolls pins =
+updateCurrentFrame : Frame -> Roll -> Frame
+updateCurrentFrame frame roll =
+    case ( frame, roll.pins ) of
+        ( EmptyFrame, 10 ) ->
+            Strike roll
+
+        ( EmptyFrame, f ) ->
+            OngoingFrame f
+
+        ( OngoingFrame f, s ) ->
+            if f + s == 10 then
+                Spare f s roll
+            else
+                NormalFrame f s
+
+        _ ->
+            EmptyFrame
+
+
+isFrameComplete frame =
+    case frame of
+        EmptyFrame ->
+            False
+
+        OngoingFrame _ ->
+            False
+
+        _ ->
+            True
+
+
+updateFrames : List Frame -> Frame -> ( List Frame, Frame )
+updateFrames frames current =
+    if isFrameComplete current then
+        ( frames ++ [ current ], EmptyFrame )
+    else
+        ( frames, current )
+
+
+rollScore : List Roll -> Int -> Int
+rollScore rolls number =
     let
-        playsToFramedRollsInt current pins =
-            case pins of
-                10 :: tail ->
-                    playsToFramedRollsInt (( Rolled 10, Skipped ) :: current) tail
+        foundRolls =
+            List.filter (\r -> r.rollNumber == number) rolls
 
-                a :: b :: tail ->
-                    playsToFramedRollsInt (( Rolled a, Rolled b ) :: current) tail
-
-                a :: tail ->
-                    playsToFramedRollsInt (( Rolled a, EmptyRoll ) :: current) tail
-
-                _ ->
-                    current
+        foundRoll =
+            List.head foundRolls
     in
-        List.reverse (playsToFramedRollsInt [] pins)
+        case foundRoll of
+            Just roll ->
+                roll.pins
+
+            Nothing ->
+                0
 
 
+calcFrameScore : Frame -> List Roll -> ScoredFrame
+calcFrameScore frame rolls =
+    let
+        score =
+            case frame of
+                Strike roll ->
+                    10 + (rollScore rolls (roll.rollNumber + 1)) + (rollScore rolls (roll.rollNumber + 2))
 
--- [1] -> [(1, _)]
--- [1,2] -> [(1,2)]
--- [1,2,3] -> [(1,2),(3,_)]
--- [10,2,3] -> [(10,_),(2,3)]
--- [0, 10,2,3] -> [(0,10),(2,3)]
+                Spare _ _ roll ->
+                    10 + (rollScore rolls (roll.rollNumber + 1))
+
+                NormalFrame f s ->
+                    f + s
+
+                OngoingFrame f ->
+                    f
+
+                EmptyFrame ->
+                    0
+    in
+        ScoredFrame frame score
+
+
+updateScoredFrames : List Frame -> List Roll -> List ScoredFrame
+updateScoredFrames frames rolls =
+    List.map (\f -> calcFrameScore f rolls) frames
 
 
 runNewRoll : Model -> Pins -> Model
 runNewRoll model pins =
     let
-        plays =
-            model.plays ++ [ pins ]
+        newRoll =
+            Roll (List.length model.rolls + 1) pins
+
+        rolls =
+            newRoll :: model.rolls
+
+        newFrame =
+            updateCurrentFrame model.currentFrame newRoll
+
+        ( frames, currentFrame ) =
+            updateFrames model.aframes newFrame
+
+        scoredFrames =
+            updateScoredFrames frames rolls
 
         feedback =
-            (toString (playsToFramedRolls plays))
-
-        frames =
-            playsToScoredFrames plays
+            toString (frames ++ [ currentFrame ])
     in
-        Model frames plays feedback
+        Model scoredFrames frames rolls currentFrame feedback
 
 
 update : Msg -> Model -> Model
@@ -212,5 +279,5 @@ update msg model =
         NewGame ->
             startGame
 
-        Roll pins ->
+        NewRoll pins ->
             runNewRoll model pins

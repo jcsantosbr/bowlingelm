@@ -8256,19 +8256,46 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
+var _user$project$Bowling$rollScore = F2(
+	function (rolls, number) {
+		var foundRolls = A2(
+			_elm_lang$core$List$filter,
+			function (r) {
+				return _elm_lang$core$Native_Utils.eq(r.rollNumber, number);
+			},
+			rolls);
+		var foundRoll = _elm_lang$core$List$head(foundRolls);
+		var _p0 = foundRoll;
+		if (_p0.ctor === 'Just') {
+			return _p0._0.pins;
+		} else {
+			return 0;
+		}
+	});
+var _user$project$Bowling$isFrameComplete = function (frame) {
+	var _p1 = frame;
+	switch (_p1.ctor) {
+		case 'EmptyFrame':
+			return false;
+		case 'OngoingFrame':
+			return false;
+		default:
+			return true;
+	}
+};
 var _user$project$Bowling$drawSecondRoll = function (frame) {
 	return _elm_lang$html$Html$text(
 		function () {
-			var _p0 = frame;
-			switch (_p0.ctor) {
+			var _p2 = frame;
+			switch (_p2.ctor) {
 				case 'EmptyFrame':
 					return '';
 				case 'OngoingFrame':
 					return '';
 				case 'NormalFrame':
-					return _elm_lang$core$Basics$toString(_p0._1);
+					return _elm_lang$core$Basics$toString(_p2._1);
 				case 'Spare':
-					return _elm_lang$core$Basics$toString(_p0._1);
+					return _elm_lang$core$Basics$toString(_p2._1);
 				default:
 					return 'X';
 			}
@@ -8277,16 +8304,16 @@ var _user$project$Bowling$drawSecondRoll = function (frame) {
 var _user$project$Bowling$drawFirstRoll = function (frame) {
 	return _elm_lang$html$Html$text(
 		function () {
-			var _p1 = frame;
-			switch (_p1.ctor) {
+			var _p3 = frame;
+			switch (_p3.ctor) {
 				case 'EmptyFrame':
 					return '';
 				case 'OngoingFrame':
-					return _elm_lang$core$Basics$toString(_p1._0);
+					return _elm_lang$core$Basics$toString(_p3._0);
 				case 'NormalFrame':
-					return _elm_lang$core$Basics$toString(_p1._0);
+					return _elm_lang$core$Basics$toString(_p3._0);
 				case 'Spare':
-					return _elm_lang$core$Basics$toString(_p1._0);
+					return _elm_lang$core$Basics$toString(_p3._0);
 				default:
 					return '10';
 			}
@@ -8362,95 +8389,61 @@ var _user$project$Bowling$drawFrame = function (frame) {
 var _user$project$Bowling$drawFrames = function (frames) {
 	return A2(_elm_lang$core$List$map, _user$project$Bowling$drawFrame, frames);
 };
+var _user$project$Bowling$Roll = F2(
+	function (a, b) {
+		return {rollNumber: a, pins: b};
+	});
 var _user$project$Bowling$ScoredFrame = F2(
 	function (a, b) {
 		return {frame: a, score: b};
 	});
-var _user$project$Bowling$Model = F3(
-	function (a, b, c) {
-		return {frames: a, plays: b, feedback: c};
-	});
-var _user$project$Bowling$startGame = A3(
-	_user$project$Bowling$Model,
-	{ctor: '[]'},
-	{ctor: '[]'},
-	'');
-var _user$project$Bowling$model = _user$project$Bowling$startGame;
-var _user$project$Bowling$Rolled = function (a) {
-	return {ctor: 'Rolled', _0: a};
-};
-var _user$project$Bowling$Skipped = {ctor: 'Skipped'};
-var _user$project$Bowling$EmptyRoll = {ctor: 'EmptyRoll'};
-var _user$project$Bowling$playsToFramedRolls = function (pins) {
-	var playsToFramedRollsInt = F2(
-		function (current, pins) {
-			playsToFramedRollsInt:
-			while (true) {
-				var _p2 = pins;
-				if (_p2.ctor === '::') {
-					if (_p2._0 === 10) {
-						var _v3 = {
-							ctor: '::',
-							_0: {
-								ctor: '_Tuple2',
-								_0: _user$project$Bowling$Rolled(10),
-								_1: _user$project$Bowling$Skipped
-							},
-							_1: current
-						},
-							_v4 = _p2._1;
-						current = _v3;
-						pins = _v4;
-						continue playsToFramedRollsInt;
-					} else {
-						if (_p2._1.ctor === '::') {
-							var _v5 = {
-								ctor: '::',
-								_0: {
-									ctor: '_Tuple2',
-									_0: _user$project$Bowling$Rolled(_p2._0),
-									_1: _user$project$Bowling$Rolled(_p2._1._0)
-								},
-								_1: current
-							},
-								_v6 = _p2._1._1;
-							current = _v5;
-							pins = _v6;
-							continue playsToFramedRollsInt;
-						} else {
-							var _v7 = {
-								ctor: '::',
-								_0: {
-									ctor: '_Tuple2',
-									_0: _user$project$Bowling$Rolled(_p2._0),
-									_1: _user$project$Bowling$EmptyRoll
-								},
-								_1: current
-							},
-								_v8 = _p2._1;
-							current = _v7;
-							pins = _v8;
-							continue playsToFramedRollsInt;
-						}
-					}
-				} else {
-					return current;
-				}
+var _user$project$Bowling$calcFrameScore = F2(
+	function (frame, rolls) {
+		var score = function () {
+			var _p4 = frame;
+			switch (_p4.ctor) {
+				case 'Strike':
+					var _p5 = _p4._0;
+					return (10 + A2(_user$project$Bowling$rollScore, rolls, _p5.rollNumber + 1)) + A2(_user$project$Bowling$rollScore, rolls, _p5.rollNumber + 2);
+				case 'Spare':
+					return 10 + A2(_user$project$Bowling$rollScore, rolls, _p4._2.rollNumber + 1);
+				case 'NormalFrame':
+					return _p4._0 + _p4._1;
+				case 'OngoingFrame':
+					return _p4._0;
+				default:
+					return 0;
 			}
-		});
-	return _elm_lang$core$List$reverse(
-		A2(
-			playsToFramedRollsInt,
-			{ctor: '[]'},
-			pins));
-};
-var _user$project$Bowling$Strike = {ctor: 'Strike'};
-var _user$project$Bowling$strikeFrame = _user$project$Bowling$Strike;
-var _user$project$Bowling$Spare = F2(
-	function (a, b) {
-		return {ctor: 'Spare', _0: a, _1: b};
+		}();
+		return A2(_user$project$Bowling$ScoredFrame, frame, score);
 	});
-var _user$project$Bowling$spareFrame = A2(_user$project$Bowling$Spare, 4, 6);
+var _user$project$Bowling$updateScoredFrames = F2(
+	function (frames, rolls) {
+		return A2(
+			_elm_lang$core$List$map,
+			function (f) {
+				return A2(_user$project$Bowling$calcFrameScore, f, rolls);
+			},
+			frames);
+	});
+var _user$project$Bowling$Model = F5(
+	function (a, b, c, d, e) {
+		return {frames: a, aframes: b, rolls: c, currentFrame: d, feedback: e};
+	});
+var _user$project$Bowling$Strike = function (a) {
+	return {ctor: 'Strike', _0: a};
+};
+var _user$project$Bowling$strikeFrame = _user$project$Bowling$Strike(
+	A2(_user$project$Bowling$Roll, 1, 10));
+var _user$project$Bowling$Spare = F3(
+	function (a, b, c) {
+		return {ctor: 'Spare', _0: a, _1: b, _2: c};
+	});
+var _user$project$Bowling$spareFrame = A3(
+	_user$project$Bowling$Spare,
+	4,
+	6,
+	A2(_user$project$Bowling$Roll, 2, 6));
 var _user$project$Bowling$NormalFrame = F2(
 	function (a, b) {
 		return {ctor: 'NormalFrame', _0: a, _1: b};
@@ -8483,46 +8476,89 @@ var _user$project$Bowling$frames = {
 		}
 	}
 };
-var _user$project$Bowling$playsToScoredFrames = function (plays) {
-	var rollToScoredFrame = function (roll) {
-		return A2(_user$project$Bowling$ScoredFrame, _user$project$Bowling$EmptyFrame, 0);
-	};
-	var framedRolls = A2(
-		_elm_lang$core$Basics_ops['++'],
-		_user$project$Bowling$playsToFramedRolls(plays),
-		{
-			ctor: '::',
-			_0: {ctor: '_Tuple2', _0: _user$project$Bowling$EmptyRoll, _1: _user$project$Bowling$EmptyRoll},
-			_1: {ctor: '[]'}
-		});
-	return A2(_elm_lang$core$List$map, rollToScoredFrame, framedRolls);
-};
+var _user$project$Bowling$startGame = A5(
+	_user$project$Bowling$Model,
+	{ctor: '[]'},
+	{ctor: '[]'},
+	{ctor: '[]'},
+	_user$project$Bowling$EmptyFrame,
+	'');
+var _user$project$Bowling$model = _user$project$Bowling$startGame;
+var _user$project$Bowling$updateCurrentFrame = F2(
+	function (frame, roll) {
+		var _p6 = {ctor: '_Tuple2', _0: frame, _1: roll.pins};
+		_v5_3:
+		do {
+			if (_p6.ctor === '_Tuple2') {
+				switch (_p6._0.ctor) {
+					case 'EmptyFrame':
+						if (_p6._1 === 10) {
+							return _user$project$Bowling$Strike(roll);
+						} else {
+							return _user$project$Bowling$OngoingFrame(_p6._1);
+						}
+					case 'OngoingFrame':
+						var _p8 = _p6._1;
+						var _p7 = _p6._0._0;
+						return _elm_lang$core$Native_Utils.eq(_p7 + _p8, 10) ? A3(_user$project$Bowling$Spare, _p7, _p8, roll) : A2(_user$project$Bowling$NormalFrame, _p7, _p8);
+					default:
+						break _v5_3;
+				}
+			} else {
+				break _v5_3;
+			}
+		} while(false);
+		return _user$project$Bowling$EmptyFrame;
+	});
+var _user$project$Bowling$updateFrames = F2(
+	function (frames, current) {
+		return _user$project$Bowling$isFrameComplete(current) ? {
+			ctor: '_Tuple2',
+			_0: A2(
+				_elm_lang$core$Basics_ops['++'],
+				frames,
+				{
+					ctor: '::',
+					_0: current,
+					_1: {ctor: '[]'}
+				}),
+			_1: _user$project$Bowling$EmptyFrame
+		} : {ctor: '_Tuple2', _0: frames, _1: current};
+	});
 var _user$project$Bowling$runNewRoll = F2(
 	function (model, pins) {
-		var plays = A2(
-			_elm_lang$core$Basics_ops['++'],
-			model.plays,
-			{
-				ctor: '::',
-				_0: pins,
-				_1: {ctor: '[]'}
-			});
+		var newRoll = A2(
+			_user$project$Bowling$Roll,
+			_elm_lang$core$List$length(model.rolls) + 1,
+			pins);
+		var rolls = {ctor: '::', _0: newRoll, _1: model.rolls};
+		var newFrame = A2(_user$project$Bowling$updateCurrentFrame, model.currentFrame, newRoll);
+		var _p9 = A2(_user$project$Bowling$updateFrames, model.aframes, newFrame);
+		var frames = _p9._0;
+		var currentFrame = _p9._1;
+		var scoredFrames = A2(_user$project$Bowling$updateScoredFrames, frames, rolls);
 		var feedback = _elm_lang$core$Basics$toString(
-			_user$project$Bowling$playsToFramedRolls(plays));
-		var frames = _user$project$Bowling$playsToScoredFrames(plays);
-		return A3(_user$project$Bowling$Model, frames, plays, feedback);
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				frames,
+				{
+					ctor: '::',
+					_0: currentFrame,
+					_1: {ctor: '[]'}
+				}));
+		return A5(_user$project$Bowling$Model, scoredFrames, frames, rolls, currentFrame, feedback);
 	});
 var _user$project$Bowling$update = F2(
 	function (msg, model) {
-		var _p3 = msg;
-		if (_p3.ctor === 'NewGame') {
+		var _p10 = msg;
+		if (_p10.ctor === 'NewGame') {
 			return _user$project$Bowling$startGame;
 		} else {
-			return A2(_user$project$Bowling$runNewRoll, model, _p3._0);
+			return A2(_user$project$Bowling$runNewRoll, model, _p10._0);
 		}
 	});
-var _user$project$Bowling$Roll = function (a) {
-	return {ctor: 'Roll', _0: a};
+var _user$project$Bowling$NewRoll = function (a) {
+	return {ctor: 'NewRoll', _0: a};
 };
 var _user$project$Bowling$NewGame = {ctor: 'NewGame'};
 var _user$project$Bowling$drawPanel = A2(
@@ -8554,7 +8590,7 @@ var _user$project$Bowling$drawPanel = A2(
 					{
 						ctor: '::',
 						_0: _elm_lang$html$Html_Events$onClick(
-							_user$project$Bowling$Roll(i)),
+							_user$project$Bowling$NewRoll(i)),
 						_1: {ctor: '[]'}
 					},
 					{
@@ -8579,7 +8615,15 @@ var _user$project$Bowling$view = function (model) {
 					_0: _elm_lang$html$Html_Attributes$class('score'),
 					_1: {ctor: '[]'}
 				},
-				_user$project$Bowling$drawFrames(model.frames)),
+				_user$project$Bowling$drawFrames(
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						model.frames,
+						{
+							ctor: '::',
+							_0: A2(_user$project$Bowling$ScoredFrame, model.currentFrame, 0),
+							_1: {ctor: '[]'}
+						}))),
 			_1: {
 				ctor: '::',
 				_0: _user$project$Bowling$drawPanel,
