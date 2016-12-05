@@ -35,35 +35,6 @@ type alias ScoredFrame =
     }
 
 
-strikeFrame =
-    Strike (Roll 1 10)
-
-
-spareFrame =
-    Spare 4 6 (Roll 2 6)
-
-
-normalFrame =
-    NormalFrame 2 5
-
-
-ongoingFrame =
-    OngoingFrame 7
-
-
-emptyFrame =
-    EmptyFrame
-
-
-frames =
-    [ (ScoredFrame strikeFrame 10 10)
-    , (ScoredFrame spareFrame 10 20)
-    , (ScoredFrame normalFrame 3 33)
-    , (ScoredFrame ongoingFrame 1 34)
-    , (ScoredFrame emptyFrame 0 34)
-    ]
-
-
 drawFirstRoll frame =
     text
         (case frame of

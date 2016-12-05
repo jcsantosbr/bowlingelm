@@ -8602,49 +8602,18 @@ var _user$project$Bowling$OngoingSpare = F2(
 var _user$project$Bowling$Strike = function (a) {
 	return {ctor: 'Strike', _0: a};
 };
-var _user$project$Bowling$strikeFrame = _user$project$Bowling$Strike(
-	A2(_user$project$Bowling$Roll, 1, 10));
 var _user$project$Bowling$Spare = F3(
 	function (a, b, c) {
 		return {ctor: 'Spare', _0: a, _1: b, _2: c};
 	});
-var _user$project$Bowling$spareFrame = A3(
-	_user$project$Bowling$Spare,
-	4,
-	6,
-	A2(_user$project$Bowling$Roll, 2, 6));
 var _user$project$Bowling$NormalFrame = F2(
 	function (a, b) {
 		return {ctor: 'NormalFrame', _0: a, _1: b};
 	});
-var _user$project$Bowling$normalFrame = A2(_user$project$Bowling$NormalFrame, 2, 5);
 var _user$project$Bowling$OngoingFrame = function (a) {
 	return {ctor: 'OngoingFrame', _0: a};
 };
-var _user$project$Bowling$ongoingFrame = _user$project$Bowling$OngoingFrame(7);
 var _user$project$Bowling$EmptyFrame = {ctor: 'EmptyFrame'};
-var _user$project$Bowling$emptyFrame = _user$project$Bowling$EmptyFrame;
-var _user$project$Bowling$frames = {
-	ctor: '::',
-	_0: A3(_user$project$Bowling$ScoredFrame, _user$project$Bowling$strikeFrame, 10, 10),
-	_1: {
-		ctor: '::',
-		_0: A3(_user$project$Bowling$ScoredFrame, _user$project$Bowling$spareFrame, 10, 20),
-		_1: {
-			ctor: '::',
-			_0: A3(_user$project$Bowling$ScoredFrame, _user$project$Bowling$normalFrame, 3, 33),
-			_1: {
-				ctor: '::',
-				_0: A3(_user$project$Bowling$ScoredFrame, _user$project$Bowling$ongoingFrame, 1, 34),
-				_1: {
-					ctor: '::',
-					_0: A3(_user$project$Bowling$ScoredFrame, _user$project$Bowling$emptyFrame, 0, 34),
-					_1: {ctor: '[]'}
-				}
-			}
-		}
-	}
-};
 var _user$project$Bowling$startGame = A5(
 	_user$project$Bowling$Model,
 	{ctor: '[]'},
