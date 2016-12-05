@@ -1,0 +1,41 @@
+div {
+  border: solid 1px black;
+  padding: 0;
+  margin: -1px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 36px;
+}
+.score {
+  border: solid 2px black;
+  height: 100px;
+  padding: -2px;
+  margin: 10px;
+}
+
+.score .frame {
+  float: left;
+  margin: -1px;
+  height: 100%;
+  width: 10%;
+}
+
+.score-frame, .score-rolls {
+  margin: -1px;
+  height: 50%;
+  line-height: 150%;
+}
+
+.roll {
+  float: left;
+  width: 50%;
+  height: 100%;
+
+}
+
+button {
+  height: 25px;
+  width: 100px;
+  vertical-align: middle;
+  
+}
