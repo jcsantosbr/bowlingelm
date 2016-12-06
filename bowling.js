@@ -8568,14 +8568,16 @@ var _user$project$Bowling$updateScoredFrames = F2(
 			},
 			frames);
 		var acummulatedScores = A2(
-			_elm_lang$core$List$map,
-			_elm_lang$core$Tuple$first,
-			_elm_lang$core$List$reverse(
-				A3(
-					_elm_lang$core$List$foldl,
-					_user$project$Bowling$accumScores,
-					{ctor: '[]'},
-					scores)));
+			_elm_lang$core$List$drop,
+			1,
+			A3(
+				_elm_lang$core$List$scanl,
+				F2(
+					function (x, y) {
+						return x + y;
+					}),
+				0,
+				scores));
 		var scoredFrames = A4(_elm_lang$core$List$map3, _user$project$Bowling$ScoredFrame, frames, scores, acummulatedScores);
 		return scoredFrames;
 	});

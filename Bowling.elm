@@ -343,23 +343,6 @@ calcFrameScore frame rolls =
         score
 
 
-accumScores : Int -> List ( Int, Int ) -> List ( Int, Int )
-accumScores score others =
-    let
-        lastElem =
-            List.head others
-
-        lastScore =
-            case lastElem of
-                Just ( score, elem ) ->
-                    score
-
-                Nothing ->
-                    0
-    in
-        ( lastScore + score, score ) :: others
-
-
 updateScoredFrames : List Frame -> List Roll -> List ScoredFrame
 updateScoredFrames frames rolls =
     let
@@ -367,7 +350,7 @@ updateScoredFrames frames rolls =
             List.map (\f -> calcFrameScore f rolls) frames
 
         acummulatedScores =
-            List.map Tuple.first (List.reverse (List.foldl accumScores [] scores))
+            List.drop 1 (List.scanl (+) 0 scores)
 
         scoredFrames =
             List.map3 ScoredFrame frames scores acummulatedScores
